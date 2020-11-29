@@ -1,0 +1,150 @@
+#include <Servo.h>
+#include <Stepper.h>
+#include <IRremote.h>
+
+int RECV_PIN = 12;
+IRrecv irrecv(RECV_PIN);
+decode_results results;
+
+//int pushbutton2 = 2;
+int angle = 104;
+unsigned long lastCode;
+Servo servo;
+const int stepsPerRevolution = 260;  
+const int rolePerMinute = 100;
+Stepper myStepper(stepsPerRevolution, 8, 10, 9, 11 );
+int i, j, k;
+void setup(){
+  Serial.begin(9600);
+  servo.attach(3); 
+  servo.write(angle);// move servos to center position -> 90°
+  
+  //pinMode (pushbutton2, INPUT_PULLUP);
+  irrecv.enableIRIn();
+  irrecv.blink13(true);
+
+  myStepper.setSpeed(rolePerMinute);
+} 
+void loop(){
+ if (irrecv.decode(&results))
+ {
+ if (results.value == 0xFFFFFFFF)
+ {
+  results.value = lastCode;
+ }
+ // This it Project 2 Task 2 (the red button)
+if (results.value == 0xFFA25D)
+ {
+  delay (500);
+ for (i = 0; i<15; i++)
+ {
+  myStepper.setSpeed(rolePerMinute);
+  myStepper.step(+1024);
+  i = i++;
+ }
+ delay (500);
+ angle=140;
+ servo.write(angle);
+ delay (250);
+ for (j = 0; j<3; j++)
+ {
+  myStepper.setSpeed(rolePerMinute);
+  myStepper.step(+1024);
+  j = j++;
+ }
+ myStepper.step(+780);
+ delay (500);
+ angle=105;
+ servo.write(angle);
+ delay (250);
+ for (j = 0; j<4; j++)
+ {
+  myStepper.setSpeed(rolePerMinute);
+  myStepper.step(+2048);
+  j = j++;
+ }
+ myStepper.step(+250);
+delay (800);
+ angle=55;
+ servo.write(angle);
+ delay (250);
+ for (k = 0; k<5; k++)
+ {
+  myStepper.setSpeed(rolePerMinute);
+  myStepper.step(+1024);
+  k = k++;
+ }
+ delay (500);
+ angle=105;
+ servo.write(angle);
+ delay (250);
+ for (k = 0; k<5; k++)
+ {
+  myStepper.setSpeed(rolePerMinute);
+  myStepper.step(+2048);
+  k = k++;
+ }
+ myStepper.step(+1000);
+ delay (500);
+ }
+
+
+ 
+ //This is project 2 Task 1
+ if (results.value == 0xFFC23D)
+ {
+  lastCode = results.value;
+  angle+=2;
+  if (angle>180){angle = 180;}
+  servo.write(angle);
+ }
+ if (results.value == 0xFF22DD)
+ {
+  lastCode = results.value;
+  angle-=2;
+  if (angle<0){angle = 0;}
+  servo.write(angle);
+ }
+ if (results.value == 0xFF02FD)
+ {
+  lastCode = results.value;
+  angle = 106;
+  servo.write(angle);
+  
+ } 
+if (results.value == 0xFF906F)
+ {
+  lastCode = results.value;
+  myStepper.setSpeed(rolePerMinute);
+  myStepper.step(+1024);
+ }
+ if (results.value == 0xFFE01F)
+ {
+  lastCode = results.value;
+  myStepper.setSpeed(rolePerMinute);
+  myStepper.step(-500);
+ }
+
+ if (results.value == 0xFFB04F)
+ {
+  lastCode = results.value;
+  myStepper.setSpeed(rolePerMinute);
+  myStepper.step(500);
+  angle=140;
+  if (angle>140){angle = 140;}
+  servo.write(angle);
+ }
+
+ if (results.value == 0xFF6897)
+ {
+  lastCode = results.value;
+  myStepper.setSpeed(rolePerMinute);
+  myStepper.step(500);
+  angle=55;
+  if (angle<55){angle = 55;}
+  servo.write(angle);
+ }
+ delay(30);
+ irrecv.resume();
+ }
+}
